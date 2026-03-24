@@ -6,24 +6,41 @@ import BottomNavBar from '../components/BottomNavBar.jsx';
 import styles from '../styles/commonStyles';
 
 export default function ContactsScreen({ navigation }) {
+  const contacts = [1, 2, 3];
+
   return (
     <View style={styles.mainContainer}>
-      <Header />
-      <ScrollView style={styles.contactsContent}>
-        {[1, 2, 3].map((item) => (
-          <View key={item} style={styles.contactCard}>
-            <Ionicons name="person-circle" size={40} color="#333" />
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactName}>Name of Emergency Contact</Text>
-              <Text style={styles.contactPhone}>Phone Number</Text>
+      <View style={styles.contactsBackdropTop} />
+      <View style={styles.contactsBackdropBottom} />
+      <Header transparent={true} />
+
+      <ScrollView contentContainerStyle={styles.contactsScrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.contactsTitle}>Emergency Contacts</Text>
+        <Text style={styles.contactsSubtitle}>People we notify during urgent situations.</Text>
+
+        {contacts.map((item) => (
+          <View key={item} style={styles.contactCardModern}>
+            <View style={styles.contactAvatarWrap}>
+              <Ionicons name="person" size={22} color="#2C3E50" />
             </View>
-            <Ionicons name="trash" size={24} color="#d32f2f" />
+
+            <View style={styles.contactInfo}>
+              <Text style={styles.contactNameModern}>Name of Emergency Contact</Text>
+              <Text style={styles.contactPhoneModern}>Phone Number</Text>
+            </View>
+
+            <TouchableOpacity style={styles.contactDeleteBtn}>
+              <Ionicons name="trash-outline" size={18} color="#C84444" />
+            </TouchableOpacity>
           </View>
         ))}
-        <TouchableOpacity>
-          <Text style={styles.addContactText}>+ Add Contact</Text>
+
+        <TouchableOpacity style={styles.addContactBtn}>
+          <Ionicons name="add-circle" size={18} color="#fff" />
+          <Text style={styles.addContactBtnText}>Add Contact</Text>
         </TouchableOpacity>
       </ScrollView>
+
       <BottomNavBar navigation={navigation} />
     </View>
   );

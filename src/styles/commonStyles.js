@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   // --- General & Layout ---
   mainContainer: { flex: 1, backgroundColor: '#fff' },
-  headerDark: { backgroundColor: '#2C3E50', height: 120, justifyContent: 'center', alignItems: 'center', paddingTop: 20 },
+  headerDark: { backgroundColor: '#fff', height: 120, justifyContent: 'center', alignItems: 'center', paddingTop: 20 },
   logoSmall: { width: 50, height: 60 },
   
   // --- Bottom Nav ---
@@ -39,8 +39,8 @@ const styles = StyleSheet.create({
   forgotText: { textAlign: 'center', fontSize: 14, fontWeight: '600', marginTop: 20, color: '#FF9800' },
 
   // --- Home Screen ---
-  homeBackdropTop: { position: 'absolute', top: -120, right: -80, width: 280, height: 280, borderRadius: 140, backgroundColor: '#E9F0FF' },
-  homeBackdropBottom: { position: 'absolute', bottom: 90, left: -70, width: 220, height: 220, borderRadius: 110, backgroundColor: '#FFF1E2' },
+  homeBackdropTop: { position: 'absolute', top: -120, right: -80, width: 280, height: 280, borderRadius: 140, backgroundColor: '#fff' },
+  homeBackdropBottom: { position: 'absolute', bottom: 90, left: -70, width: 220, height: 220, borderRadius: 110, backgroundColor: '#fff' },
   homeScrollContent: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 },
   homeHero: { marginTop: 10, marginBottom: 20 },
   homeEyebrow: { color: '#E67E22', fontWeight: '700', fontSize: 13, letterSpacing: 1 },
@@ -60,20 +60,43 @@ const styles = StyleSheet.create({
   dirCardMeta: { color: '#F3F6F8', fontSize: 11, marginTop: 4 },
 
   // --- Profile Screen ---
-  profileContent: { flex: 1, alignItems: 'center', paddingTop: 40 },
-  avatarPlaceholder: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#2C3E50', marginBottom: 15 },
-  profileName: { fontSize: 24, color: '#2C3E50', fontWeight: 'bold' },
-  profileEmail: { fontSize: 14, color: '#888', marginBottom: 40 },
-  profileMenu: { width: '80%', gap: 20 },
-  profileBtn: { backgroundColor: '#FF9800', flexDirection: 'row', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 20, borderRadius: 10, gap: 15 },
-  profileBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  profileBackdropTop: { position: 'absolute', top: -130, left: -70, width: 260, height: 260, borderRadius: 130, backgroundColor: '#fff' },
+  profileBackdropBottom: { position: 'absolute', bottom: 90, right: -80, width: 240, height: 240, borderRadius: 120, backgroundColor: '#fff' },
+  profileScrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
+  profileTitle: { fontSize: 32, fontWeight: '900', color: '#1F2D3D' },
+  profileSubtitle: { fontSize: 14, color: '#647483', marginTop: 8, marginBottom: 16 },
+  profileCard: { backgroundColor: '#F9FBFF', borderRadius: 22, alignItems: 'center', paddingVertical: 26, paddingHorizontal: 20, borderWidth: 1, borderColor: '#E5ECF3', elevation: 4, shadowColor: '#5D6B79', shadowOpacity: 0.12, shadowRadius: 10 },
+  avatarPlaceholder: { width: 102, height: 102, borderRadius: 51, backgroundColor: '#DDE7F2', marginBottom: 12, alignItems: 'center', justifyContent: 'center' },
+  profileName: { fontSize: 24, color: '#233445', fontWeight: '800', marginTop: 4 },
+  profileEmail: { fontSize: 14, color: '#778797', marginTop: 4 },
+  profileEditChip: { marginTop: 14, backgroundColor: '#2C3E50', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  profileEditChipText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  profileMenu: { marginTop: 18, gap: 12 },
+  profileActionRow: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#E8EDF3', paddingVertical: 14, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center' },
+  profileIconWrap: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#EEF3F8', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  profileActionText: { flex: 1, color: '#2E3D4B', fontSize: 15, fontWeight: '700' },
+  profileLogoutBtn: { marginTop: 16, backgroundColor: '#FFF5F5', borderRadius: 14, borderWidth: 1, borderColor: '#F2D0D0', paddingVertical: 14, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center' },
+  profileLogoutIconWrap: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FDE7E7', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  profileLogoutText: { color: '#C84444', fontSize: 15, fontWeight: '800' },
 
   // --- Contacts Screen ---
   contactsContent: { flex: 1, padding: 20 },
+  contactsBackdropTop: { position: 'absolute', top: -110, right: -80, width: 250, height: 250, borderRadius: 125, backgroundColor: '#fff' },
+  contactsBackdropBottom: { position: 'absolute', bottom: 90, left: -70, width: 220, height: 220, borderRadius: 110, backgroundColor: '#fff' },
+  contactsScrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
+  contactsTitle: { fontSize: 32, fontWeight: '900', color: '#1F2D3D' },
+  contactsSubtitle: { fontSize: 14, color: '#627484', marginTop: 8, marginBottom: 18 },
+  contactCardModern: { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E7EDF4', paddingVertical: 14, paddingHorizontal: 12, marginBottom: 12, flexDirection: 'row', alignItems: 'center', elevation: 2, shadowColor: '#667788', shadowOpacity: 0.08, shadowRadius: 6 },
+  contactAvatarWrap: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#EDF3F9', justifyContent: 'center', alignItems: 'center' },
   contactCard: { backgroundColor: '#FF9800', flexDirection: 'row', alignItems: 'center', padding: 15, borderRadius: 15, marginBottom: 15 },
   contactInfo: { flex: 1, marginLeft: 15 },
+  contactNameModern: { color: '#223446', fontWeight: '800', fontSize: 15 },
+  contactPhoneModern: { color: '#6F8191', fontSize: 12, marginTop: 3 },
+  contactDeleteBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FCEBEC', justifyContent: 'center', alignItems: 'center' },
   contactName: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   contactPhone: { color: '#fff', fontSize: 12 },
+  addContactBtn: { marginTop: 6, backgroundColor: '#2C3E50', borderRadius: 12, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
+  addContactBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   addContactText: { color: '#4CAF50', fontWeight: 'bold', textAlign: 'center', fontSize: 16, marginTop: 10 }
 });
 

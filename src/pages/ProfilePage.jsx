@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
@@ -8,27 +8,59 @@ import styles from '../styles/commonStyles';
 export default function ProfileScreen({ navigation }) {
   return (
     <View style={styles.mainContainer}>
-      <Header />
-      <View style={styles.profileContent}>
-        <View style={styles.avatarPlaceholder} />
-        <Text style={styles.profileName}>Name</Text>
-        <Text style={styles.profileEmail}>Example@gmail.com</Text>
+      <View style={styles.profileBackdropTop} />
+      <View style={styles.profileBackdropBottom} />
+      <Header transparent={true} />
 
-        <View style={styles.profileMenu}>
-          <TouchableOpacity style={styles.profileBtn}>
-            <Ionicons name="person" size={20} color="#333" />
-            <Text style={styles.profileBtnText}>Edit Profile</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.profileBtn}>
-            <MaterialCommunityIcons name="medical-bag" size={20} color="#333" />
-            <Text style={styles.profileBtnText}>Set Medical Information</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.profileBtn}>
-            <Ionicons name="settings" size={20} color="#333" />
-            <Text style={styles.profileBtnText}>Settings</Text>
+      <ScrollView contentContainerStyle={styles.profileScrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.profileTitle}>My Profile</Text>
+        <Text style={styles.profileSubtitle}>Manage your account and emergency settings.</Text>
+
+        <View style={styles.profileCard}>
+          <View style={styles.avatarPlaceholder}>
+            <Ionicons name="person" size={42} color="#2C3E50" />
+          </View>
+          <Text style={styles.profileName}>Name</Text>
+          <Text style={styles.profileEmail}>example@gmail.com</Text>
+          <TouchableOpacity style={styles.profileEditChip}>
+            <Text style={styles.profileEditChipText}>Update Photo</Text>
           </TouchableOpacity>
         </View>
-      </View>
+
+        <View style={styles.profileMenu}>
+          <TouchableOpacity style={styles.profileActionRow}>
+            <View style={styles.profileIconWrap}>
+              <Ionicons name="person" size={18} color="#2C3E50" />
+            </View>
+            <Text style={styles.profileActionText}>Edit Profile</Text>
+            <Ionicons name="chevron-forward" size={18} color="#8A96A3" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.profileActionRow}>
+            <View style={styles.profileIconWrap}>
+              <MaterialCommunityIcons name="medical-bag" size={18} color="#2C3E50" />
+            </View>
+            <Text style={styles.profileActionText}>Set Medical Information</Text>
+            <Ionicons name="chevron-forward" size={18} color="#8A96A3" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.profileActionRow}>
+            <View style={styles.profileIconWrap}>
+              <Ionicons name="settings" size={18} color="#2C3E50" />
+            </View>
+            <Text style={styles.profileActionText}>Settings</Text>
+            <Ionicons name="chevron-forward" size={18} color="#8A96A3" />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.profileLogoutBtn} onPress={() => navigation.navigate('Login')}>
+          <View style={styles.profileLogoutIconWrap}>
+            <Ionicons name="log-out-outline" size={18} color="#C84444" />
+          </View>
+          <Text style={styles.profileLogoutText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
       <BottomNavBar navigation={navigation} />
     </View>
   );
