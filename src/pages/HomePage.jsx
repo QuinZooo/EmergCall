@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
@@ -8,34 +8,50 @@ import styles from '../styles/commonStyles';
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.mainContainer}>
-      <Header />
-      <View style={styles.homeContent}>
-        <TouchableOpacity style={styles.sosButton}>
-          <Text style={styles.sosText}>SOS</Text>
-          <Ionicons name="notifications" size={50} color="#fff" />
+      <View style={styles.homeBackdropTop} />
+      <View style={styles.homeBackdropBottom} />
+      <Header transparent={true} />
+
+      <ScrollView contentContainerStyle={styles.homeScrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.homeHero}>
+          <Text style={styles.homeEyebrow}>Stay Ready</Text>
+          <Text style={styles.homeTitle}>Emergency Hub</Text>
+          <Text style={styles.homeSubtitle}>Fast access to emergency services when every second counts.</Text>
+        </View>
+
+        <TouchableOpacity style={styles.sosCircleButton}>
+          <Text style={styles.sosCircleTitle}>Trigger SOS</Text>
+          <Text style={styles.sosCircleHint}>Tap for emergency help</Text>
         </TouchableOpacity>
 
-        <View style={styles.directoryRow}>
-          <TouchableOpacity style={[styles.dirBtn, { backgroundColor: '#2C3E50' }]}>
-            <View style={styles.iconCircle}>
+        <Text style={styles.quickLabel}>Quick Directory</Text>
+        <View style={styles.directoryGrid}>
+          <TouchableOpacity style={[styles.dirCard, styles.policeCard]}>
+            <View style={styles.dirIconBubble}>
               <Ionicons name="shield-checkmark" size={30} color="#2C3E50" />
             </View>
-            <Text style={styles.dirBtnText}>Police</Text>
+            <Text style={styles.dirCardTitle}>Police</Text>
+            <Text style={styles.dirCardMeta}>911 Hotline</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.dirBtn, { backgroundColor: '#E65100' }]}>
-            <View style={styles.iconCircle}>
+
+          <TouchableOpacity style={[styles.dirCard, styles.fireCard]}>
+            <View style={styles.dirIconBubble}>
               <MaterialCommunityIcons name="fire" size={30} color="#E65100" />
             </View>
-            <Text style={styles.dirBtnText}>Fire</Text>
+            <Text style={styles.dirCardTitle}>Fire</Text>
+            <Text style={styles.dirCardMeta}>Rescue Team</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.dirBtn, { backgroundColor: '#4DD0E1' }]}>
-            <View style={styles.iconCircle}>
+
+          <TouchableOpacity style={[styles.dirCard, styles.medicCard]}>
+            <View style={styles.dirIconBubble}>
               <MaterialCommunityIcons name="hospital-box" size={30} color="#4DD0E1" />
             </View>
-            <Text style={styles.dirBtnText}>Medic</Text>
+            <Text style={styles.dirCardTitle}>Medic</Text>
+            <Text style={styles.dirCardMeta}>Ambulance</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
+
       <BottomNavBar navigation={navigation} />
     </View>
   );
