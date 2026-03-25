@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform, View } from 'react-native';
 
 // Import Pages
 import SplashPage from './src/pages/SplashPage.jsx';
@@ -22,18 +23,56 @@ const routes = [
 ];
 
 export default function App() {
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') {
+      return;
+    }
+
+    const viewportContent = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
+    let viewportMeta = document.querySelector('meta[name="viewport"]');
+
+    if (!viewportMeta) {
+      viewportMeta = document.createElement('meta');
+      viewportMeta.setAttribute('name', 'viewport');
+      document.head.appendChild(viewportMeta);
+    }
+
+    viewportMeta.setAttribute('content', viewportContent);
+
+    document.documentElement.style.width = '100%';
+    document.documentElement.style.height = '100%';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.backgroundColor = '#E6F4FE';
+
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.body.style.margin = '0';
+    document.body.style.overflow = 'hidden';
+    document.body.style.backgroundColor = '#E6F4FE';
+
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.style.width = '100%';
+      rootElement.style.height = '100%';
+      rootElement.style.overflow = 'hidden';
+      rootElement.style.backgroundColor = '#E6F4FE';
+    }
+  }, []);
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-        {routes.map((route) => (
-          <Stack.Screen
-            key={route.name}
-            name={route.name}
-            component={route.component}
-            options={{ headerShown: false }}
-          />
-        ))}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={{ flex: 1, backgroundColor: '#E6F4FE' }}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+          {routes.map((route) => (
+            <Stack.Screen
+              key={route.name}
+              name={route.name}
+              component={route.component}
+              options={{ headerShown: false }}
+            />
+          ))}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </View>
   );
 }

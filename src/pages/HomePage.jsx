@@ -20,7 +20,7 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <TouchableOpacity style={styles.sosCircleButton}>
-          <Text style={styles.sosCircleTitle}>Trigger SOS</Text>
+          <Text style={styles.sosCircleTitle}></Text>
           <Text style={styles.sosCircleHint}>Tap for emergency help</Text>
         </TouchableOpacity>
 
