@@ -32,20 +32,20 @@ const styles = StyleSheet.create({
   rememberContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 30 },
   checkboxBox: { width: 15, height: 15, backgroundColor: '#ccc', marginRight: 10 },
   rememberText: { fontSize: 12, fontWeight: 'bold' },
-  primaryButton: { backgroundColor: '#FF9800', paddingVertical: 12, alignItems: 'center', marginBottom: 12, borderRadius: 8 },
-  primaryButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  secondaryButton: { backgroundColor: '#2C3E50', paddingVertical: 12, alignItems: 'center', marginBottom: 10, borderRadius: 8 },
-  secondaryButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  primaryButton: { backgroundColor: '#FF9800', paddingVertical: 16, paddingHorizontal: 20, alignItems: 'center', marginBottom: 12, borderRadius: 8 },
+  primaryButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16, lineHeight: 22 },
+  secondaryButton: { backgroundColor: '#2C3E50', paddingVertical: 16, paddingHorizontal: 20, alignItems: 'center', marginBottom: 10, borderRadius: 8 },
+  secondaryButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16, lineHeight: 22 },
   forgotText: { textAlign: 'center', fontSize: 14, fontWeight: '600', marginTop: 20, color: '#FF9800' },
 
   // --- Home Screen ---
   homeBackdropTop: { position: 'absolute', top: -120, right: -80, width: 280, height: 280, borderRadius: 140, backgroundColor: '#fff' },
   homeBackdropBottom: { position: 'absolute', bottom: 90, left: -70, width: 220, height: 220, borderRadius: 110, backgroundColor: '#fff' },
   homeScrollContent: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 },
-  homeHero: { marginTop: 10, marginBottom: 20 },
-  homeEyebrow: { color: '#E67E22', fontWeight: '700', fontSize: 13, letterSpacing: 1 },
-  homeTitle: { color: '#1F2D3D', fontSize: 34, fontWeight: '900', marginTop: 6 },
-  homeSubtitle: { color: '#5F6E7A', fontSize: 15, lineHeight: 22, marginTop: 8, maxWidth: '90%' },
+  homeHero: { marginTop: 20, marginBottom: 32, paddingVertical: 12 },
+  homeEyebrow: { color: '#FF9800', fontWeight: '700', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 },
+  homeTitle: { color: '#1F2D3D', fontSize: 40, fontWeight: '900', marginTop: 12, lineHeight: 48, letterSpacing: -0.5 },
+  homeSubtitle: { color: '#6B7F94', fontSize: 16, lineHeight: 24, marginTop: 14, maxWidth: '90%', fontWeight: '500' },
   sosCircleButton: { width: 220, height: 220, borderRadius: 110, backgroundColor: '#D64545', alignSelf: 'center', justifyContent: 'center', alignItems: 'center', marginTop: 8, marginBottom: 24, elevation: 8, shadowColor: '#8E1A1A', shadowOpacity: 0.3, shadowRadius: 12 },
   sosCircleTitle: { color: '#fff', fontSize: 26, fontWeight: '900', marginBottom: 8 },
   sosCircleHint: { color: '#FFE5E5', fontSize: 12, marginTop: 8 },
@@ -97,7 +97,13 @@ const styles = StyleSheet.create({
   contactPhone: { color: '#fff', fontSize: 12 },
   addContactBtn: { marginTop: 6, backgroundColor: '#2C3E50', borderRadius: 12, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   addContactBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  addContactText: { color: '#4CAF50', fontWeight: 'bold', textAlign: 'center', fontSize: 16, marginTop: 10 }
+  addContactText: { color: '#4CAF50', fontWeight: 'bold', textAlign: 'center', fontSize: 16, marginTop: 10 },
+
+  // --- Modal Styles ---
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: '#fff', borderRadius: 20, padding: 25, width: '90%', maxWidth: 400, elevation: 10, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10 },
+  modalTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', marginBottom: 20, color: '#2C3E50' },
+  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24, gap: 12 }
 });
 
 export default styles;

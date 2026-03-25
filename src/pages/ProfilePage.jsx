@@ -8,6 +8,22 @@ import styles from '../styles/commonStyles';
 
 export default function ProfileScreen({ navigation }) {
   const [loggingOut, setLoggingOut] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch user', err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
     if (loggingOut) {
@@ -45,8 +61,8 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.avatarPlaceholder}>
             <Ionicons name="person" size={42} color="#2C3E50" />
           </View>
-          <Text style={styles.profileName}>Name</Text>
-          <Text style={styles.profileEmail}>example@gmail.com</Text>
+          <Text style={styles.profileName}>{user?.user_metadata?.full_name || 'User'}</Text>
+          <Text style={styles.profileEmail}>{user?.email || 'example@gmail.com'}</Text>
           <TouchableOpacity style={styles.profileEditChip}>
             <Text style={styles.profileEditChipText}>Update Photo</Text>
           </TouchableOpacity>

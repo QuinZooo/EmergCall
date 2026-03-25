@@ -9,6 +9,7 @@ import SignupPage from './src/pages/SignupPage.jsx';
 import HomePage from './src/pages/HomePage.jsx';
 import ProfilePage from './src/pages/ProfilePage.jsx';
 import ContactsPage from './src/pages/ContactsPage.jsx';
+import SOSPage from './src/pages/SOSPage.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,7 +19,8 @@ const routes = [
   { name: 'Signup', component: SignupPage },
   { name: 'Home', component: HomePage },
   { name: 'Profile', component: ProfilePage },
-  { name: 'Contacts', component: ContactsPage }
+  { name: 'Contacts', component: ContactsPage },
+  { name: 'SOS', component: SOSPage }
 ];
 
 export default function App() {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
@@ -19,14 +19,14 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.homeSubtitle}>Fast access to emergency services when every second counts.</Text>
         </View>
 
-        <TouchableOpacity style={styles.sosCircleButton}>
+        <TouchableOpacity style={styles.sosCircleButton} onPress={() => navigation.navigate('SOS')}>
           <Text style={styles.sosCircleTitle}>Trigger SOS</Text>
           <Text style={styles.sosCircleHint}>Tap for emergency help</Text>
         </TouchableOpacity>
 
         <Text style={styles.quickLabel}>Quick Directory</Text>
         <View style={styles.directoryGrid}>
-          <TouchableOpacity style={[styles.dirCard, styles.policeCard]}>
+          <TouchableOpacity style={[styles.dirCard, styles.policeCard]} onPress={() => Linking.openURL('tel:911')}>
             <View style={styles.dirIconBubble}>
               <Ionicons name="shield-checkmark" size={30} color="#2C3E50" />
             </View>
@@ -34,7 +34,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.dirCardMeta}>911 Hotline</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.dirCard, styles.fireCard]}>
+          <TouchableOpacity style={[styles.dirCard, styles.fireCard]} onPress={() => Linking.openURL('tel:911')}>
             <View style={styles.dirIconBubble}>
               <MaterialCommunityIcons name="fire" size={30} color="#E65100" />
             </View>
@@ -42,7 +42,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.dirCardMeta}>Rescue Team</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.dirCard, styles.medicCard]}>
+          <TouchableOpacity style={[styles.dirCard, styles.medicCard]} onPress={() => Linking.openURL('tel:911')}>
             <View style={styles.dirIconBubble}>
               <MaterialCommunityIcons name="hospital-box" size={30} color="#4DD0E1" />
             </View>
