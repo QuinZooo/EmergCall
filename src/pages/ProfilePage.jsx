@@ -1,11 +1,36 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
+import { supabase } from '../lib/supabase.js';
 import styles from '../styles/commonStyles';
 
 export default function ProfileScreen({ navigation }) {
+  const [loggingOut, setLoggingOut] = React.useState(false);
+
+  const handleLogout = async () => {
+    if (loggingOut) {
+      return;
+    }
+
+    setLoggingOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        Alert.alert('Logout Failed', error.message || 'Unable to logout right now.');
+        return;
+      }
+
+      navigation.replace('Login');
+    } catch (err) {
+      Alert.alert('Logout Failed', err?.message || 'Unable to logout right now.');
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.profileBackdropTop} />
@@ -53,11 +78,11 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.profileLogoutBtn} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.profileLogoutBtn} onPress={handleLogout} disabled={loggingOut}>
           <View style={styles.profileLogoutIconWrap}>
             <Ionicons name="log-out-outline" size={18} color="#C84444" />
           </View>
-          <Text style={styles.profileLogoutText}>Logout</Text>
+          <Text style={styles.profileLogoutText}>{loggingOut ? 'Logging out...' : 'Logout'}</Text>
         </TouchableOpacity>
       </ScrollView>
 
