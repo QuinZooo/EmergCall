@@ -19,8 +19,8 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.homeSubtitle}>Fast access to emergency services when every second counts.</Text>
         </View>
 
-        <TouchableOpacity style={styles.sosCircleButton} onPress={() => navigation.navigate('SOS')}>
-          <Text style={styles.sosCircleTitle}>Trigger SOS</Text>
+        <TouchableOpacity style={styles.sosCircleButton}>
+          <Text style={styles.sosCircleTitle}></Text>
           <Text style={styles.sosCircleHint}>Tap for emergency help</Text>
         </TouchableOpacity>
 
