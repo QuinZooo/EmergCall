@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, TouchableOpacity, Alert, Linking } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase.js';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
 import styles from '../styles/commonStyles';
@@ -10,24 +11,42 @@ export default function SOSPage({ navigation }) {
   const [countdown, setCountdown] = React.useState(5);
   const [contacts, setContacts] = React.useState([]);
   const [isSending, setIsSending] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+
+  const getStorageKey = () => (user?.id ? `emergencyContacts:${user.id}` : 'emergencyContacts');
+
+  const loadContacts = async () => {
+    try {
+      const key = getStorageKey();
+      const stored = await AsyncStorage.getItem(key);
+      if (stored) {
+        setContacts(JSON.parse(stored));
+      } else {
+        setContacts([]);
+      }
+    } catch (error) {
+      console.warn('Failed to read contacts', error);
+    }
+  };
 
   React.useEffect(() => {
-    let running = true;
-    const fetchContacts = async () => {
+    const fetchUser = async () => {
       try {
-        const stored = await AsyncStorage.getItem('emergencyContacts');
-        if (running && stored) {
-          setContacts(JSON.parse(stored));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
         }
-      } catch (error) {
-        console.warn('Failed to read contacts', error);
+      } catch (err) {
+        console.warn('Failed to get session', err);
       }
     };
 
-    fetchContacts();
-
-    return () => { running = false; };
+    fetchUser();
   }, []);
+
+  React.useEffect(() => {
+    loadContacts();
+  }, [user]);
 
   React.useEffect(() => {
     if (countdown <= 0) {

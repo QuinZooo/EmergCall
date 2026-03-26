@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase.js';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
 import styles from '../styles/commonStyles';
@@ -11,10 +12,14 @@ export default function ContactsScreen({ navigation }) {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [newName, setNewName] = React.useState('');
   const [newPhone, setNewPhone] = React.useState('');
+  const [user, setUser] = React.useState(null);
+
+  const getStorageKey = () => (user?.id ? `emergencyContacts:${user.id}` : 'emergencyContacts');
 
   const loadContacts = async () => {
     try {
-      const stored = await AsyncStorage.getItem('emergencyContacts');
+      const key = getStorageKey();
+      const stored = await AsyncStorage.getItem(key);
       if (stored) setContacts(JSON.parse(stored));
     } catch (e) {
       // Ignore errors
@@ -22,12 +27,28 @@ export default function ContactsScreen({ navigation }) {
   };
 
   React.useEffect(() => {
-    loadContacts();
+    const fetchUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+        }
+      } catch (err) {
+        console.warn('Failed to get session', err);
+      }
+    };
+
+    fetchUser();
   }, []);
+
+  React.useEffect(() => {
+    loadContacts();
+  }, [user]);
 
   const saveContacts = async (newContacts) => {
     try {
-      await AsyncStorage.setItem('emergencyContacts', JSON.stringify(newContacts));
+      const key = getStorageKey();
+      await AsyncStorage.setItem(key, JSON.stringify(newContacts));
       setContacts(newContacts);
     } catch (e) {
       Alert.alert('Error', 'Failed to save contact');
