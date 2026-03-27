@@ -11,9 +11,11 @@ export default function SignupScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [verificationCode, setVerificationCode] = React.useState('');
+  const [verificationModalVisible, setVerificationModalVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
-  const [successModalVisible, setSuccessModalVisible] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState('');
 
   const validateForm = () => {
     if (!fullName.trim()) {
@@ -43,8 +45,9 @@ export default function SignupScreen({ navigation }) {
     return true;
   };
 
-  const handleSignup = async () => {
+  const handleCreateAccount = async () => {
     setError('');
+    setSuccessMessage('');
     
     if (!validateForm()) {
       return;
@@ -52,35 +55,87 @@ export default function SignupScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // Sign up with Supabase
-      const { data, error: signupError } = await supabase.auth.signUp({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        password: password,
         options: {
+          shouldCreateUser: true,
           data: {
             full_name: fullName.trim(),
           },
         },
       });
 
-      if (signupError) {
-        setError(signupError.message);
-        Alert.alert('Signup Error', signupError.message);
-        setLoading(false);
+      if (otpError) {
+        setError(otpError.message);
+        Alert.alert('Signup Error', otpError.message);
         return;
       }
 
-      // Clear form
-      setFullName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-
-      // Use an in-app modal so the message always appears on web and mobile.
-      setSuccessModalVisible(true);
+      setVerificationCode('');
+      setVerificationModalVisible(true);
+      setSuccessMessage('Verification code sent. Check your email from EmergCall App.');
     } catch (err) {
       setError(err.message || 'An error occurred during signup');
       Alert.alert('Error', err.message || 'An error occurred during signup');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    setError('');
+    setSuccessMessage('');
+
+    if (!verificationCode.trim()) {
+      setError('Verification code is required');
+      return;
+    }
+
+    if (verificationCode.trim().length !== 6) {
+      setError('Please enter the 6-digit verification code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: verificationCode.trim(),
+        type: 'email',
+      });
+
+      if (verifyError) {
+        setError(verifyError.message);
+        Alert.alert('Verification Error', verifyError.message);
+        return;
+      }
+
+      if (data?.session) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password,
+          data: {
+            full_name: fullName.trim(),
+          },
+        });
+
+        if (passwordError) {
+          setError(passwordError.message);
+          Alert.alert('Profile Error', passwordError.message);
+          return;
+        }
+
+        setSuccessMessage('Email verified successfully. Account created.');
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setVerificationCode('');
+        setVerificationModalVisible(false);
+        navigation.navigate('Home');
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred during verification');
+      Alert.alert('Verification Error', err.message || 'An error occurred during verification');
     } finally {
       setLoading(false);
     }
@@ -91,46 +146,58 @@ export default function SignupScreen({ navigation }) {
       <View style={[styles.mainContainer, { justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }]}>
         <Modal
           transparent={true}
-          visible={successModalVisible}
+          visible={verificationModalVisible}
           animationType="fade"
-          onRequestClose={() => {
-            setSuccessModalVisible(false);
-            navigation.navigate('Login');
-          }}
+          onRequestClose={() => setVerificationModalVisible(false)}
         >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.45)',
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingHorizontal: 24,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: '#fff',
-                width: '100%',
-                maxWidth: 360,
-                borderRadius: 14,
-                padding: 20,
-              }}
-            >
-              <Text style={{ fontSize: 20, fontWeight: '700', color: '#111', marginBottom: 12 }}>
-                Check Your Email First
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Confirm your signup</Text>
+              <Text style={{ color: '#334', fontSize: 14, marginBottom: 8, textAlign: 'center' }}>
+                From EmergCall App
               </Text>
-              <Text style={{ fontSize: 15, color: '#333', lineHeight: 22, marginBottom: 18 }}>
-                We sent you a confirmation email. Please click the link in your email before you can log in.
+              <Text style={{ color: '#445', fontSize: 14, marginBottom: 16, textAlign: 'center' }}>
+                Enter the 6-digit verification code sent to {email.trim()}.
               </Text>
 
+              <TextInput
+                style={styles.input}
+                placeholder="Enter 6-digit code"
+                placeholderTextColor="#999"
+                keyboardType="number-pad"
+                autoCapitalize="none"
+                value={verificationCode}
+                onChangeText={setVerificationCode}
+                editable={!loading}
+                maxLength={6}
+              />
+
               <TouchableOpacity
-                style={[styles.primaryButton, { marginTop: 0 }]}
-                onPress={() => {
-                  setSuccessModalVisible(false);
-                  navigation.navigate('Login');
-                }}
+                style={[styles.primaryButton, { opacity: loading ? 0.6 : 1 }]}
+                onPress={handleVerifyCode}
+                disabled={loading}
               >
-                <Text style={styles.primaryButtonText}>OK</Text>
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>VERIFY CODE</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.secondaryButton, { opacity: loading ? 0.6 : 1 }]}
+                onPress={handleCreateAccount}
+                disabled={loading}
+              >
+                <Text style={styles.secondaryButtonText}>RESEND CODE</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.secondaryButton, { opacity: loading ? 0.6 : 1 }]}
+                onPress={() => setVerificationModalVisible(false)}
+                disabled={loading}
+              >
+                <Text style={styles.secondaryButtonText}>CLOSE</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -143,6 +210,12 @@ export default function SignupScreen({ navigation }) {
           {error ? (
             <View style={{ backgroundColor: '#ffe5e5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
               <Text style={{ color: '#c00', fontSize: 14 }}>{error}</Text>
+            </View>
+          ) : null}
+
+          {successMessage ? (
+            <View style={{ backgroundColor: '#e8f6ee', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+              <Text style={{ color: '#0c6b3f', fontSize: 14 }}>{successMessage}</Text>
             </View>
           ) : null}
 
@@ -171,7 +244,7 @@ export default function SignupScreen({ navigation }) {
 
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputWithIcon}>
-            <TextInput 
+            <TextInput
               style={styles.inputField}
               placeholder="Enter your password"
               placeholderTextColor="#999"
@@ -180,7 +253,7 @@ export default function SignupScreen({ navigation }) {
               onChangeText={setPassword}
               editable={!loading}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
               style={styles.eyeIconButton}
               disabled={loading}
@@ -191,7 +264,7 @@ export default function SignupScreen({ navigation }) {
 
           <Text style={styles.label}>Confirm Password</Text>
           <View style={styles.inputWithIcon}>
-            <TextInput 
+            <TextInput
               style={styles.inputField}
               placeholder="Confirm your password"
               placeholderTextColor="#999"
@@ -200,7 +273,7 @@ export default function SignupScreen({ navigation }) {
               onChangeText={setConfirmPassword}
               editable={!loading}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               style={styles.eyeIconButton}
               disabled={loading}
@@ -211,7 +284,7 @@ export default function SignupScreen({ navigation }) {
 
           <TouchableOpacity 
             style={[styles.primaryButton, { opacity: loading ? 0.6 : 1 }]} 
-            onPress={handleSignup}
+            onPress={handleCreateAccount}
             disabled={loading}
           >
             {loading ? (
