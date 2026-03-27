@@ -118,7 +118,39 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { backgroundColor: '#fff', borderRadius: 20, padding: 25, width: '90%', maxWidth: 400, elevation: 10, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10 },
   modalTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', marginBottom: 20, color: '#2C3E50' },
-  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24, gap: 12 }
+  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24, gap: 12 },
+
+  // --- Hotline Screen ---
+  hotlineCard: { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E7EDF4', paddingVertical: 14, paddingHorizontal: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center', elevation: 2, shadowColor: '#667788', shadowOpacity: 0.08, shadowRadius: 6 },
+  hotlineIconWrap: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  hotlineInfo: { flex: 1, marginLeft: 14 },
+  hotlineLabel: { color: '#223446', fontWeight: '800', fontSize: 15 },
+  hotlineNumber: { color: '#6F8191', fontSize: 13, marginTop: 3 },
+  hotlineCallBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E8F8EF', justifyContent: 'center', alignItems: 'center' },
+
+  // --- Report Incident Screen ---
+  incidentTypeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
+  incidentTypeChip: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1.5, borderColor: '#DCE5EE', backgroundColor: '#F9FBFF' },
+  incidentTypeChipActive: { borderColor: '#FF9800', backgroundColor: '#FFF3E0' },
+  incidentTypeText: { color: '#5F6E7A', fontWeight: '700', fontSize: 13 },
+  incidentTypeTextActive: { color: '#E65100' },
+  incidentTextArea: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#DCE5EE', borderRadius: 12, padding: 14, fontSize: 15, minHeight: 120, color: '#1F2D3D' },
+  incidentLocationRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF8F0', borderRadius: 12, padding: 14, gap: 10, borderWidth: 1, borderColor: '#FFE0B2' },
+  incidentLocationText: { flex: 1, color: '#5F6E7A', fontSize: 14, fontWeight: '600' },
+
+  // --- GPS Screen ---
+  gpsContainer: { flex: 1, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
+  gpsCard: { backgroundColor: '#F9FBFF', borderRadius: 22, borderWidth: 1, borderColor: '#E5ECF3', marginTop: 20, elevation: 4, shadowColor: '#5D6B79', shadowOpacity: 0.12, shadowRadius: 10, overflow: 'hidden' },
+  mapContainer: { width: '100%', height: 280, borderRadius: 22 },
+  gpsCenterContent: { alignItems: 'center', paddingVertical: 30 },
+  gpsLoadingText: { color: '#6B7F94', fontSize: 15, marginTop: 14, fontWeight: '600' },
+  gpsErrorText: { color: '#D64545', fontSize: 15, marginTop: 14, fontWeight: '600', textAlign: 'center' },
+  gpsIconRow: { marginBottom: 14 },
+  gpsCoords: { fontSize: 18, fontWeight: '800', color: '#1F2D3D', textAlign: 'center' },
+  gpsAddress: { fontSize: 14, color: '#6B7F94', marginTop: 12, marginBottom: 16, textAlign: 'center', lineHeight: 20, fontWeight: '500', paddingHorizontal: 20 },
+  gpsActions: { flexDirection: 'row', gap: 12, marginTop: 16, width: '100%', paddingHorizontal: 20 },
+  gpsRefreshBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 20, paddingVertical: 10 },
+  gpsRefreshText: { color: '#2C3E50', fontWeight: '700', fontSize: 14 }
 });
 
 export default styles;
