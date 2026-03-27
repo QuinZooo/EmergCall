@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity, Alert, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import * as Location from 'expo-location';
+import * as SMS from 'expo-sms';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase.js';
 import Header from '../components/Header.jsx';
@@ -12,12 +13,14 @@ export default function SOSPage({ navigation }) {
   const [contacts, setContacts] = React.useState([]);
   const [isSending, setIsSending] = React.useState(false);
   const [user, setUser] = React.useState(null);
+  const [medicalInfo, setMedicalInfo] = React.useState(null);
+  const hasSentRef = React.useRef(false);
 
-  const getStorageKey = () => (user?.id ? `emergencyContacts:${user.id}` : 'emergencyContacts');
+  const getStorageKey = (suffix) => (user?.id ? `${suffix}:${user.id}` : suffix);
 
   const loadContacts = async () => {
     try {
-      const key = getStorageKey();
+      const key = getStorageKey('emergencyContacts');
       const stored = await AsyncStorage.getItem(key);
       if (stored) {
         setContacts(JSON.parse(stored));
@@ -26,6 +29,18 @@ export default function SOSPage({ navigation }) {
       }
     } catch (error) {
       console.warn('Failed to read contacts', error);
+    }
+  };
+
+  const loadMedicalInfo = async () => {
+    try {
+      const key = getStorageKey('medicalInfo');
+      const stored = await AsyncStorage.getItem(key);
+      if (stored) {
+        setMedicalInfo(JSON.parse(stored));
+      }
+    } catch (err) {
+      console.warn('Failed to load medical info', err);
     }
   };
 
@@ -46,9 +61,14 @@ export default function SOSPage({ navigation }) {
 
   React.useEffect(() => {
     loadContacts();
+    loadMedicalInfo();
   }, [user]);
 
   React.useEffect(() => {
+    if (hasSentRef.current) {
+      return;
+    }
+
     if (countdown <= 0) {
       sendSOS();
       return;
@@ -59,10 +79,12 @@ export default function SOSPage({ navigation }) {
   }, [countdown]);
 
   const sendSOS = async () => {
-    if (isSending) return;
+    if (isSending || hasSentRef.current) return;
+    hasSentRef.current = true;
     setIsSending(true);
 
     let locationText = '';
+    let medicalText = '';
 
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
@@ -75,9 +97,14 @@ export default function SOSPage({ navigation }) {
       console.warn('Location error', err);
     }
 
-    const message = encodeURIComponent(
-      `EMERGENCY!\nI need help now. This is an auto-alert from EmergCall.${locationText}`
-    );
+    if (medicalInfo && (medicalInfo.bloodType || medicalInfo.allergies || medicalInfo.medications)) {
+      medicalText = '\n\n--- MEDICAL INFO ---';
+      if (medicalInfo.bloodType) medicalText += `\nBlood: ${medicalInfo.bloodType}`;
+      if (medicalInfo.allergies) medicalText += `\nAllergies: ${medicalInfo.allergies}`;
+      if (medicalInfo.medications) medicalText += `\nMeds: ${medicalInfo.medications}`;
+    }
+
+    const message = `EMERGENCY!\nI need help now. This is an auto-alert from EmergCall.${locationText}${medicalText}`;
 
     if (!contacts || contacts.length === 0) {
       Alert.alert(
@@ -85,32 +112,45 @@ export default function SOSPage({ navigation }) {
         'No emergency contacts saved. Please add a contact first in Contacts screen.',
         [{ text: 'Go to Contacts', onPress: () => navigation.navigate('Contacts') }]
       );
+      hasSentRef.current = false;
       setIsSending(false);
       return;
     }
 
     const phoneList = contacts
-      .map((c) => c.phone?.replace(/[^0-9,+]/g, ''))
-      .filter(Boolean)
-      .join(',');
+      .map((c) => c.phone?.replace(/[^0-9+]/g, ''))
+      .filter(Boolean);
 
-    if (!phoneList) {
+    if (!phoneList || phoneList.length === 0) {
       Alert.alert('Invalid number', 'No valid phone numbers found in saved contacts.');
+      hasSentRef.current = false;
       setIsSending(false);
       return;
     }
 
-    const url = `sms:${phoneList}?body=${message}`;
+    try {
+      const isAvailable = await SMS.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert('SMS Not Available', 'SMS is not available on this device.');
+        hasSentRef.current = false;
+        setIsSending(false);
+        return;
+      }
 
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-      Alert.alert('SOS sent', 'Emergency message prepared in your SMS app.');
-    } else {
-      Alert.alert('Send failed', 'Unable to open SMS app on this device.');
+      const result = await SMS.sendSMSAsync(phoneList, message);
+      
+      if (result.result === 'sent' || result.result === 'unknown') {
+        Alert.alert('SOS Sent', `Emergency alert sent to ${phoneList.length} contact(s).`);
+      } else {
+        hasSentRef.current = false;
+        Alert.alert('Send Cancelled', 'SOS message was not sent.');
+      }
+    } catch (err) {
+      hasSentRef.current = false;
+      Alert.alert('Send failed', err?.message || 'Unable to send emergency alert.');
+    } finally {
+      setIsSending(false);
     }
-
-    setIsSending(false);
   };
 
   return (
@@ -119,11 +159,20 @@ export default function SOSPage({ navigation }) {
       <View style={styles.homeBackdropBottom} />
       <Header transparent={true} />
 
-      <View style={[styles.homeScrollContent, { paddingTop: 60, justifyContent: 'center', alignItems: 'center', flex: 1 }]}>  
+      <View style={[styles.homeScrollContent, { paddingTop: 40, paddingBottom: 20, justifyContent: 'flex-start', alignItems: 'center', flex: 1 }]}>  
         <Text style={[styles.homeTitle, { fontSize: 28, marginBottom: 10 }]}>SOS Alert</Text>
-        <Text style={[styles.homeSubtitle, { textAlign: 'center', maxWidth: '90%' }]}>Your SOS will trigger in {countdown} second{countdown === 1 ? '' : 's'}. Please confirm or cancel.</Text>
+        <Text style={[styles.homeSubtitle, { textAlign: 'center', maxWidth: '90%', marginBottom: 20 }]}>Your SOS will trigger in {countdown} second{countdown === 1 ? '' : 's'}. Please confirm or cancel.</Text>
 
-        <View style={{ marginTop: 30, width: '85%' }}>
+        {medicalInfo && (medicalInfo.bloodType || medicalInfo.allergies || medicalInfo.medications) && (
+          <View style={styles.sosMedicalBox}>
+            <Text style={styles.sosMedicalTitle}>⚠️ Medical Alert Info</Text>
+            {medicalInfo.bloodType && <Text style={styles.sosMedicalLine}><Text style={{ fontWeight: '700' }}>Blood:</Text> {medicalInfo.bloodType}</Text>}
+            {medicalInfo.allergies && <Text style={styles.sosMedicalLine}><Text style={{ fontWeight: '700' }}>Allergies:</Text> {medicalInfo.allergies}</Text>}
+            {medicalInfo.medications && <Text style={styles.sosMedicalLine}><Text style={{ fontWeight: '700' }}>Meds:</Text> {medicalInfo.medications}</Text>}
+          </View>
+        )}
+
+        <View style={{ marginTop: 24, width: '85%' }}>
           <TouchableOpacity
             style={[styles.primaryButton, { marginBottom: 12, backgroundColor: '#D64545' }]}
             onPress={sendSOS}

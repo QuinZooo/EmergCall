@@ -150,7 +150,23 @@ const styles = StyleSheet.create({
   gpsAddress: { fontSize: 14, color: '#6B7F94', marginTop: 12, marginBottom: 16, textAlign: 'center', lineHeight: 20, fontWeight: '500', paddingHorizontal: 20 },
   gpsActions: { flexDirection: 'row', gap: 12, marginTop: 16, width: '100%', paddingHorizontal: 20 },
   gpsRefreshBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 20, paddingVertical: 10 },
-  gpsRefreshText: { color: '#2C3E50', fontWeight: '700', fontSize: 14 }
+  gpsRefreshText: { color: '#2C3E50', fontWeight: '700', fontSize: 14 },
+
+  // --- Medical Info Screen ---
+  medicalScrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
+  medicalCard: { backgroundColor: '#F9FBFF', borderRadius: 18, borderWidth: 1, borderColor: '#E5ECF3', padding: 20, marginTop: 20, marginBottom: 20, gap: 18 },
+  medicalFieldGroup: { gap: 8 },
+  medicalFieldHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
+  medicalFieldLabel: { fontSize: 14, fontWeight: '700', color: '#2C3E50' },
+  medicalInput: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#DCE5EE', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F2D3D' },
+  medicalTextArea: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' },
+  medicalInfoBox: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#E0F7FF', borderRadius: 12, padding: 14, gap: 10, marginTop: 16, borderLeftWidth: 4, borderLeftColor: '#2AAFC2' },
+  medicalInfoText: { flex: 1, fontSize: 13, color: '#0D5F75', fontWeight: '500', lineHeight: 18 },
+
+  // SOS Medical Alert
+  sosMedicalBox: { backgroundColor: '#FFF3E0', borderRadius: 12, padding: 14, borderWidth: 2, borderColor: '#FF9800', width: '90%', marginTop: 16 },
+  sosMedicalTitle: { fontSize: 14, fontWeight: '800', color: '#E65100', marginBottom: 8 },
+  sosMedicalLine: { fontSize: 13, color: '#5D4037', fontWeight: '500', marginBottom: 6 }
 });
 
 export default styles;

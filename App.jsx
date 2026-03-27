@@ -14,6 +14,7 @@ import SOSPage from './src/pages/SOSPage.jsx';
 import HotlinePage from './src/pages/HotlinePage.jsx';
 import ReportIncidentPage from './src/pages/ReportIncidentPage.jsx';
 import GPSPage from './src/pages/GPSPage.jsx';
+import MedicalInfoPage from './src/pages/MedicalInfoPage.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +28,8 @@ const routes = [
   { name: 'SOS', component: SOSPage },
   { name: 'Hotline', component: HotlinePage },
   { name: 'ReportIncident', component: ReportIncidentPage },
-  { name: 'GPS', component: GPSPage }
+  { name: 'GPS', component: GPSPage },
+  { name: 'MedicalInfo', component: MedicalInfoPage }
 ];
 
 export default function App() {
