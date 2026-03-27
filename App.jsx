@@ -11,6 +11,9 @@ import HomePage from './src/pages/HomePage.jsx';
 import ProfilePage from './src/pages/ProfilePage.jsx';
 import ContactsPage from './src/pages/ContactsPage.jsx';
 import SOSPage from './src/pages/SOSPage.jsx';
+import HotlinePage from './src/pages/HotlinePage.jsx';
+import ReportIncidentPage from './src/pages/ReportIncidentPage.jsx';
+import GPSPage from './src/pages/GPSPage.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,7 +24,10 @@ const routes = [
   { name: 'Home', component: HomePage },
   { name: 'Profile', component: ProfilePage },
   { name: 'Contacts', component: ContactsPage },
-  { name: 'SOS', component: SOSPage }
+  { name: 'SOS', component: SOSPage },
+  { name: 'Hotline', component: HotlinePage },
+  { name: 'ReportIncident', component: ReportIncidentPage },
+  { name: 'GPS', component: GPSPage }
 ];
 
 export default function App() {
