@@ -12,7 +12,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Location is needed to share your position during an SOS alert."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,13 +24,10 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
-    },
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Location is needed to share your position during an SOS alert."
-      }
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -35,6 +35,9 @@
     "extra": {
       "supabaseUrl": "https://xswwxmhgtgahsqgaodjx.supabase.co",
       "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzd3d4bWhndGdhaHNxZ2FvZGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDc3MjAsImV4cCI6MjA4OTkyMzcyMH0.x7uEKX7K66zoOKSgztZDMla1zNQGlNXHM4LrG5her0s"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

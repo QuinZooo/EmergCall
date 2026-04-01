@@ -309,7 +309,7 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={18} color="#8A96A3" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.profileActionRow}>
+          <TouchableOpacity style={styles.profileActionRow} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.profileIconWrap}>
               <Ionicons name="settings" size={18} color="#2C3E50" />
             </View>

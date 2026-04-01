@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import Header from '../components/Header.jsx';
 import { supabase } from '../lib/supabase.js';
+import { resolvePostLoginRoute } from '../lib/mfaFlow.js';
 import styles from '../styles/commonStyles';
 
 export default function LoginScreen({ navigation }) {
@@ -48,7 +49,8 @@ export default function LoginScreen({ navigation }) {
       }
 
       if (data?.session) {
-        navigation.navigate('Home');
+        const nextRoute = await resolvePostLoginRoute();
+        navigation.replace(nextRoute);
       }
     } catch (err) {
       const fallback = 'An error occurred while logging in.';

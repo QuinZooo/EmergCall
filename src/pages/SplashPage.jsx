@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import styles from '../styles/commonStyles';
 import { supabase } from '../lib/supabase.js';
+import { resolvePostLoginRoute } from '../lib/mfaFlow.js';
 
 export default function SplashScreen({ navigation }) {
   const [checkingSession, setCheckingSession] = React.useState(true);
@@ -18,7 +19,8 @@ export default function SplashScreen({ navigation }) {
         }
 
         if (!error && data?.session) {
-          navigation.replace('Home');
+          const nextRoute = await resolvePostLoginRoute();
+          navigation.replace(nextRoute);
           return;
         }
       } finally {
