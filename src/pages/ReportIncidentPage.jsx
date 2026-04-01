@@ -1,9 +1,17 @@
 import * as React from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase.js';
+import {
+  appendLocalReport,
+  enqueueReportForSync,
+  getFriendlySyncError,
+  patchLocalReportById,
+  retryPendingReportSync,
+  syncLocalReportToCloud,
+} from '../lib/reportSync.js';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
 import styles from '../styles/commonStyles';
@@ -16,6 +24,7 @@ export default function ReportIncidentScreen({ navigation }) {
   const [location, setLocation] = React.useState(null);
   const [fetchingLocation, setFetchingLocation] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [selectedPhotos, setSelectedPhotos] = React.useState([]);
 
   const getLocation = async () => {
     setFetchingLocation(true);
@@ -38,11 +47,72 @@ export default function ReportIncidentScreen({ navigation }) {
     getLocation();
   }, []);
 
+  const retryPendingSyncForCurrentUser = React.useCallback(async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user?.id) {
+        return;
+      }
+
+      await retryPendingReportSync(session.user.id);
+    } catch (err) {
+      console.warn('Retry pending sync failed:', err?.message || err);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    retryPendingSyncForCurrentUser();
+  }, [retryPendingSyncForCurrentUser]);
+
+  const handlePickPhotos = async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permission.status !== 'granted') {
+        Alert.alert('Permission needed', 'Please allow gallery access to attach report photos.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+        allowsEditing: false,
+        allowsMultipleSelection: true,
+        selectionLimit: 5,
+      });
+
+      if (result.canceled || !result.assets?.length) {
+        return;
+      }
+
+      setSelectedPhotos((prev) => {
+        const existingUris = new Set(prev.map((photo) => photo.uri));
+        const incoming = result.assets
+          .filter((asset) => !existingUris.has(asset.uri))
+          .map((asset, index) => ({
+            id: `${Date.now()}-${index}`,
+            uri: asset.uri,
+          }));
+
+        return [...prev, ...incoming].slice(0, 5);
+      });
+    } catch (err) {
+      Alert.alert('Photo error', err?.message || 'Unable to select photos.');
+    }
+  };
+
+  const removePhoto = (id) => {
+    setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== id));
+  };
+
   const handleSubmit = async () => {
     if (!selectedType) {
       Alert.alert('Missing info', 'Please select an incident type.');
       return;
     }
+
     if (!description.trim()) {
       Alert.alert('Missing info', 'Please describe the incident.');
       return;
@@ -50,33 +120,83 @@ export default function ReportIncidentScreen({ navigation }) {
 
     setSubmitting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id || 'anonymous';
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      const report = {
-        id: Date.now().toString(),
-        userId,
-        type: selectedType,
+      const userId = session?.user?.id || 'anonymous';
+      const localId = `local-${Date.now()}`;
+      const localReport = {
+        local_id: localId,
+        user_id: userId,
+        incident_type: selectedType,
         description: description.trim(),
-        location: location || null,
-        timestamp: new Date().toISOString(),
+        latitude: location?.latitude ?? null,
+        longitude: location?.longitude ?? null,
+        status: 'submitted',
+        priority: 'normal',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        photo_uris: selectedPhotos.map((photo) => photo.uri),
+        sync_status: session?.user?.id ? 'syncing' : 'local_only',
+        cloud_report_id: '',
+        last_sync_error: '',
+        sync_source: 'report_incident_page',
       };
 
-      // Save locally
-      const key = `incidentReports:${userId}`;
-      const existing = await AsyncStorage.getItem(key);
-      const reports = existing ? JSON.parse(existing) : [];
-      reports.unshift(report);
-      await AsyncStorage.setItem(key, JSON.stringify(reports));
+      await appendLocalReport(userId, localReport);
 
-      Alert.alert('Report Submitted', 'Your incident report has been saved.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      if (!session?.user?.id) {
+        Alert.alert('Report Saved Locally', 'You are not logged in. Login to sync reports and photos to cloud.', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+        return;
+      }
+
+      try {
+        const cloudReportId = await syncLocalReportToCloud({
+          userId: session.user.id,
+          report: localReport,
+        });
+
+        await patchLocalReportById(session.user.id, localId, {
+          sync_status: 'synced',
+          cloud_report_id: cloudReportId,
+          last_sync_error: '',
+          updated_at: new Date().toISOString(),
+        });
+
+        Alert.alert('Report Submitted', 'Your report has been saved to cloud and local storage.', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      } catch (syncError) {
+        const syncMessage = getFriendlySyncError(syncError);
+
+        await patchLocalReportById(session.user.id, localId, {
+          sync_status: 'pending_retry',
+          last_sync_error: syncMessage,
+          updated_at: new Date().toISOString(),
+        });
+        await enqueueReportForSync({
+          userId: session.user.id,
+          localId,
+          errorMessage: syncMessage,
+        });
+
+        Alert.alert('Queued For Sync', 'Report saved locally. Cloud sync will retry automatically.', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      }
     } catch (err) {
-      Alert.alert('Error', 'Failed to submit report.');
+      Alert.alert('Error', err?.message || 'Failed to submit report.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSubmitWithRetryFirst = async () => {
+    await retryPendingSyncForCurrentUser();
+    await handleSubmit();
   };
 
   return (
@@ -125,9 +245,34 @@ export default function ReportIncidentScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+        <Text style={[styles.label, { marginTop: 20 }]}>Report Photos (Optional)</Text>
+        <TouchableOpacity style={styles.incidentPhotoPickerBtn} onPress={handlePickPhotos} disabled={submitting}>
+          <Ionicons name="images-outline" size={18} color="#2C3E50" />
+          <Text style={styles.incidentPhotoPickerText}>Select up to 5 photos</Text>
+        </TouchableOpacity>
+
+        {selectedPhotos.length ? (
+          <View style={styles.incidentPhotoGrid}>
+            {selectedPhotos.map((photo) => (
+              <View key={photo.id} style={styles.incidentPhotoItem}>
+                <Image source={{ uri: photo.uri }} style={styles.incidentPhotoPreview} />
+                <TouchableOpacity
+                  style={styles.incidentPhotoRemoveBtn}
+                  onPress={() => removePhoto(photo.id)}
+                  disabled={submitting}
+                >
+                  <Ionicons name="close" size={12} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.incidentPhotoHint}>No photos selected.</Text>
+        )}
+
         <TouchableOpacity
           style={[styles.primaryButton, { marginTop: 24, opacity: submitting ? 0.6 : 1 }]}
-          onPress={handleSubmit}
+          onPress={handleSubmitWithRetryFirst}
           disabled={submitting}
         >
           <Text style={styles.primaryButtonText}>{submitting ? 'Submitting...' : 'Submit Report'}</Text>

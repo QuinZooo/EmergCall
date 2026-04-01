@@ -50,6 +50,17 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.dirCardMeta}>Emergency</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity style={styles.myReportsCard} onPress={() => navigation.navigate('MyReports')}>
+          <View style={styles.myReportsCardIconWrap}>
+            <Ionicons name="folder-open" size={22} color="#2C3E50" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.myReportsCardTitle}>My Reports</Text>
+            <Text style={styles.myReportsCardMeta}>Track status and review uploaded photos.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#6B7F94" />
+        </TouchableOpacity>
       </ScrollView>
 
       <BottomNavBar navigation={navigation} />

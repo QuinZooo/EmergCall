@@ -15,6 +15,8 @@ import HotlinePage from './src/pages/HotlinePage.jsx';
 import ReportIncidentPage from './src/pages/ReportIncidentPage.jsx';
 import GPSPage from './src/pages/GPSPage.jsx';
 import MedicalInfoPage from './src/pages/MedicalInfoPage.jsx';
+import MyReportsPage from './src/pages/MyReportsPage.jsx';
+import ReportDetailPage from './src/pages/ReportDetailPage.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +30,8 @@ const routes = [
   { name: 'SOS', component: SOSPage },
   { name: 'Hotline', component: HotlinePage },
   { name: 'ReportIncident', component: ReportIncidentPage },
+  { name: 'MyReports', component: MyReportsPage },
+  { name: 'ReportDetail', component: ReportDetailPage },
   { name: 'GPS', component: GPSPage },
   { name: 'MedicalInfo', component: MedicalInfoPage }
 ];

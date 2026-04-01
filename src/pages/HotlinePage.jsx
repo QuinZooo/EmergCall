@@ -8,12 +8,13 @@ import styles from '../styles/commonStyles';
 const HOTLINES = [
   { id: '1', label: 'National Emergency', number: '911', icon: 'shield-checkmark', iconType: 'ionicon', color: '#2C3E50' },
   { id: '2', label: 'Philippine Red Cross', number: '143', icon: 'medkit', iconType: 'ionicon', color: '#D64545' },
-  { id: '3', label: 'Bureau of Fire Protection', number: '(02) 8426-0219', icon: 'fire', iconType: 'material', color: '#E65100' },
-  { id: '4', label: 'PNP Hotline', number: '117', icon: 'shield', iconType: 'ionicon', color: '#1A5276' },
+  { id: '3', label: 'QC Fire Department (BFP)', number: '(02) 8925-0168', icon: 'fire', iconType: 'material', color: '#E65100' },
+  { id: '4', label: 'QC Police (QCPD)', number: '(02) 8988-8722', icon: 'shield', iconType: 'ionicon', color: '#1A5276' },
   { id: '5', label: 'NDRRMC', number: '(02) 8911-5061', icon: 'warning', iconType: 'ionicon', color: '#FF9800' },
   { id: '6', label: 'DOH Health Hotline', number: '1555', icon: 'hospital-box', iconType: 'material', color: '#2AAFC2' },
-  { id: '7', label: 'MMDA Hotline', number: '136', icon: 'car', iconType: 'ionicon', color: '#27AE60' },
-  { id: '8', label: 'Bantay Bata (Child Abuse)', number: '163', icon: 'people', iconType: 'ionicon', color: '#8E44AD' },
+  { id: '7', label: 'QC Disaster Risk Reduction', number: '(02) 8925-1170', icon: 'alert-circle', iconType: 'ionicon', color: '#FF9800' },
+  { id: '8', label: 'PNP Hotline', number: '117', icon: 'call', iconType: 'ionicon', color: '#27AE60' },
+  { id: '9', label: 'Bantay Bata (Child Abuse)', number: '163', icon: 'people', iconType: 'ionicon', color: '#8E44AD' },
 ];
 
 export default function HotlineScreen({ navigation }) {
