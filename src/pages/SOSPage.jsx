@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import * as SMS from 'expo-sms';
+import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase.js';
 import { loadAppSettings, DEFAULT_APP_SETTINGS } from '../lib/appSettings.js';
@@ -13,10 +14,13 @@ export default function SOSPage({ navigation }) {
   const [countdown, setCountdown] = React.useState(DEFAULT_APP_SETTINGS.sosCountdownSeconds);
   const [contacts, setContacts] = React.useState([]);
   const [isSending, setIsSending] = React.useState(false);
+  const [isAlarmPlaying, setIsAlarmPlaying] = React.useState(false);
   const [user, setUser] = React.useState(null);
   const [medicalInfo, setMedicalInfo] = React.useState(null);
   const [appSettings, setAppSettings] = React.useState({ ...DEFAULT_APP_SETTINGS });
   const hasSentRef = React.useRef(false);
+  const alarmSoundRef = React.useRef(null);
+  const alarmTimeoutRef = React.useRef(null);
 
   const getStorageKey = (suffix) => (user?.id ? `${suffix}:${user.id}` : suffix);
 
@@ -93,10 +97,70 @@ export default function SOSPage({ navigation }) {
     return () => clearTimeout(timer);
   }, [countdown]);
 
+  const stopAlarm = React.useCallback(async () => {
+    if (alarmTimeoutRef.current) {
+      clearTimeout(alarmTimeoutRef.current);
+      alarmTimeoutRef.current = null;
+    }
+
+    if (!alarmSoundRef.current) {
+      return;
+    }
+
+    try {
+      await alarmSoundRef.current.stopAsync();
+      await alarmSoundRef.current.unloadAsync();
+    } catch (err) {
+      console.warn('Failed to stop alarm', err);
+    } finally {
+      alarmSoundRef.current = null;
+      setIsAlarmPlaying(false);
+    }
+  }, []);
+
+  const playAlarm = React.useCallback(async () => {
+    try {
+      if (alarmSoundRef.current) {
+        await alarmSoundRef.current.replayAsync();
+      } else {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: false,
+          playThroughEarpieceAndroid: false,
+        });
+
+        const { sound } = await Audio.Sound.createAsync(
+          require('../../assets/sounds/sos_alert.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 1.0 }
+        );
+        alarmSoundRef.current = sound;
+      }
+
+      setIsAlarmPlaying(true);
+
+      if (alarmTimeoutRef.current) {
+        clearTimeout(alarmTimeoutRef.current);
+      }
+
+      alarmTimeoutRef.current = setTimeout(() => {
+        stopAlarm();
+      }, 15000);
+    } catch (err) {
+      console.warn('Failed to play alarm', err);
+    }
+  }, [stopAlarm]);
+
+  React.useEffect(() => () => {
+    stopAlarm();
+  }, [stopAlarm]);
+
   const sendSOS = async () => {
     if (isSending || hasSentRef.current) return;
     hasSentRef.current = true;
     setIsSending(true);
+    await playAlarm();
 
     let locationText = '';
     let medicalText = '';
@@ -202,9 +266,21 @@ export default function SOSPage({ navigation }) {
             <Text style={styles.primaryButtonText}>{isSending ? 'Sending...' : 'Send SOS Now'}</Text>
           </TouchableOpacity>
 
+          {isAlarmPlaying ? (
+            <TouchableOpacity
+              style={[styles.secondaryButton, { marginBottom: 12, borderColor: '#C84444' }]}
+              onPress={stopAlarm}
+            >
+              <Text style={[styles.secondaryButtonText, { color: '#C84444', fontWeight: '800' }]}>Stop Alarm</Text>
+            </TouchableOpacity>
+          ) : null}
+
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => navigation.goBack()}
+            onPress={async () => {
+              await stopAlarm();
+              navigation.goBack();
+            }}
           >
             <Text style={styles.secondaryButtonText}>Cancel</Text>
           </TouchableOpacity>
