@@ -225,6 +225,7 @@ export default function ProfileScreen({ navigation }) {
     }
   };
   const [user, setUser] = React.useState(null);
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   React.useEffect(() => {
     const fetchUser = async () => {
@@ -232,6 +233,12 @@ export default function ProfileScreen({ navigation }) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser(session.user);
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          setIsAdmin(profile?.role === 'admin');
         }
       } catch (err) {
         console.warn('Failed to fetch user', err);
@@ -367,7 +374,7 @@ export default function ProfileScreen({ navigation }) {
         </View>
       </Modal>
 
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar navigation={navigation} variant={isAdmin ? 'admin' : 'user'} />
     </View>
   );
 }

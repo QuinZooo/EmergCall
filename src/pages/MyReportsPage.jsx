@@ -293,14 +293,14 @@ export default function MyReportsScreen({ navigation }) {
           </View>
         ) : null}
 
-        {!loading && reports.map((report) => {
+        {!loading && reports.map((report, index) => {
           const statusStyle = getStatusPillStyle(report.status);
           const priorityStyle = getPriorityPillStyle(report.priority);
           const syncStyle = getSyncPillStyle(report.sync_status);
 
           return (
             <TouchableOpacity
-              key={report.id}
+              key={report.id || `report-${index}`}
               style={styles.myReportCard}
               activeOpacity={0.92}
               onPress={() => {

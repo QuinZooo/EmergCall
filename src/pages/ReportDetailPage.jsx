@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Alert, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import Header from '../components/Header.jsx';
 import BottomNavBar from '../components/BottomNavBar.jsx';
 import { supabase } from '../lib/supabase.js';
@@ -21,9 +22,11 @@ const formatTimestamp = (value) => {
 
 export default function ReportDetailScreen({ navigation, route }) {
   const reportId = route?.params?.reportId;
+  const adminView = route?.params?.adminView === true;
   const [loading, setLoading] = React.useState(true);
   const [report, setReport] = React.useState(null);
   const [photos, setPhotos] = React.useState([]);
+  const [locationName, setLocationName] = React.useState('');
 
   const loadDetail = React.useCallback(async () => {
     if (!reportId) {
@@ -56,6 +59,22 @@ export default function ReportDetailScreen({ navigation, route }) {
 
       setReport(reportRow);
       setPhotos(photoRows || []);
+
+      if (typeof reportRow.latitude === 'number' && typeof reportRow.longitude === 'number') {
+        try {
+          const results = await Location.reverseGeocodeAsync({
+            latitude: reportRow.latitude,
+            longitude: reportRow.longitude,
+          });
+          if (results?.length) {
+            const r = results[0];
+            const parts = [r.name, r.street, r.district, r.city, r.region].filter(Boolean);
+            setLocationName(parts.join(', '));
+          }
+        } catch {
+          setLocationName('');
+        }
+      }
     } catch (err) {
       Alert.alert('Load Error', err?.message || 'Unable to load report details right now.');
     } finally {
@@ -116,7 +135,9 @@ export default function ReportDetailScreen({ navigation, route }) {
             <View style={styles.reportDetailBlock}>
               <Text style={styles.reportDetailLabel}>Location</Text>
               {typeof report.latitude === 'number' && typeof report.longitude === 'number' ? (
-                <Text style={styles.reportDetailValue}>{report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}</Text>
+                <Text style={styles.reportDetailValue}>
+                  {locationName || `${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}`}
+                </Text>
               ) : (
                 <Text style={styles.reportDetailValue}>No location attached</Text>
               )}
@@ -127,12 +148,15 @@ export default function ReportDetailScreen({ navigation, route }) {
               {photos.length ? (
                 <View style={styles.myReportPhotoGrid}>
                   {photos.map((photo, index) => (
-                    <Image
-                      key={`${photo.file_path || report.id}-${index}`}
-                      source={{ uri: photo.file_url }}
-                      style={styles.myReportPhoto}
-                      resizeMode="cover"
-                    />
+                    photo.file_url ? (
+                      <Image
+                        key={`${photo.file_path || report.id}-${index}`}
+                        source={{ uri: photo.file_url }}
+                        style={styles.myReportPhoto}
+                        resizeMode="cover"
+                        onError={(e) => console.warn('Photo load failed:', e.nativeEvent.error)}
+                      />
+                    ) : null
                   ))}
                 </View>
               ) : (
@@ -143,7 +167,7 @@ export default function ReportDetailScreen({ navigation, route }) {
         ) : null}
       </ScrollView>
 
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar navigation={navigation} variant={adminView ? 'admin' : 'user'} />
     </View>
   );
 }

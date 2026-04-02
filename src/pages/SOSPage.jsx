@@ -21,6 +21,8 @@ export default function SOSPage({ navigation }) {
   const hasSentRef = React.useRef(false);
   const alarmSoundRef = React.useRef(null);
   const alarmTimeoutRef = React.useRef(null);
+  const sendSOSRef = React.useRef(null); // always holds the latest sendSOS
+  const cancelledRef = React.useRef(false); // set on cancel/unmount/logout to abort in-flight sendSOS
 
   const getStorageKey = (suffix) => (user?.id ? `${suffix}:${user.id}` : suffix);
 
@@ -89,7 +91,9 @@ export default function SOSPage({ navigation }) {
     }
 
     if (countdown <= 0) {
-      sendSOS();
+      // Use ref so the effect never captures a stale sendSOS closure.
+      // Alarm is triggered inside sendSOS — only here and the button press.
+      sendSOSRef.current?.();
       return;
     }
 
@@ -153,13 +157,16 @@ export default function SOSPage({ navigation }) {
   }, [stopAlarm]);
 
   React.useEffect(() => () => {
+    cancelledRef.current = true;
     stopAlarm();
   }, [stopAlarm]);
 
   const sendSOS = async () => {
     if (isSending || hasSentRef.current) return;
     hasSentRef.current = true;
+    cancelledRef.current = false; // reset for this send attempt
     setIsSending(true);
+    // Alarm plays only here — triggered by countdown reaching 0 or the button.
     await playAlarm();
 
     let locationText = '';
@@ -213,6 +220,13 @@ export default function SOSPage({ navigation }) {
       return;
     }
 
+    // If the user cancelled or navigated away while location was loading, abort before the dialog.
+    if (cancelledRef.current) {
+      hasSentRef.current = false;
+      setIsSending(false);
+      return;
+    }
+
     try {
       const isAvailable = await SMS.isAvailableAsync();
       if (!isAvailable) {
@@ -237,6 +251,9 @@ export default function SOSPage({ navigation }) {
       setIsSending(false);
     }
   };
+
+  // Keep the ref in sync so the countdown effect always calls the latest version.
+  sendSOSRef.current = sendSOS;
 
   return (
     <View style={styles.mainContainer}>
@@ -278,6 +295,7 @@ export default function SOSPage({ navigation }) {
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={async () => {
+              cancelledRef.current = true;
               await stopAlarm();
               navigation.goBack();
             }}

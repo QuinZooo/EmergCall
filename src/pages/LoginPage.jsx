@@ -118,7 +118,7 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.secondaryButtonText}>CREATE ACCOUNT</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} disabled={loading}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </TouchableOpacity>
         </View>

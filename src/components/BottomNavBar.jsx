@@ -1,23 +1,65 @@
 import * as React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import styles from '../styles/commonStyles';
 
-const BottomNavBar = ({ navigation }) => (
-  <View style={styles.bottomNav}>
-    <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Contacts')}>
-      <Ionicons name="people-circle" size={28} color="#fff" />
-      <Text style={styles.navText}>Contacts</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-      <Ionicons name="home" size={28} color="#fff" />
-      <Text style={styles.navText}>Home</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-      <Ionicons name="person-circle" size={28} color="#fff" />
-      <Text style={styles.navText}>Profile</Text>
-    </TouchableOpacity>
-  </View>
-);
+export default function BottomNavBar({ navigation, variant = 'user' }) {
+  const items = variant === 'admin'
+    ? [
+        {
+          key: 'reports',
+          label: 'Reports',
+          icon: <MaterialCommunityIcons name="file-document-multiple-outline" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('AdminReports'),
+        },
+        {
+          key: 'admin',
+          label: 'Admin Panel',
+          icon: <Ionicons name="shield-checkmark" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('AdminDashboard'),
+        },
+        {
+          key: 'profile',
+          label: 'Profile',
+          icon: <Ionicons name="person-circle" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('Profile'),
+        },
+      ]
+    : [
+        {
+          key: 'contacts',
+          label: 'Contacts',
+          icon: <Ionicons name="people-circle" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('Contacts'),
+        },
+        {
+          key: 'home',
+          label: 'Home',
+          icon: <Ionicons name="home" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('Home'),
+        },
+        {
+          key: 'reports',
+          label: 'My Reports',
+          icon: <MaterialCommunityIcons name="file-document-outline" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('MyReports'),
+        },
+        {
+          key: 'profile',
+          label: 'Profile',
+          icon: <Ionicons name="person-circle" size={24} color="#fff" />,
+          onPress: () => navigation.navigate('Profile'),
+        },
+      ];
 
-export default BottomNavBar;
+  return (
+    <View style={styles.bottomNav}>
+      {items.map((item) => (
+        <TouchableOpacity key={item.key} style={styles.navItem} onPress={item.onPress}>
+          {item.icon}
+          <Text style={styles.navText}>{item.label}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
