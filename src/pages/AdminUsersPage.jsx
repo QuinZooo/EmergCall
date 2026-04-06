@@ -39,6 +39,15 @@ export default function AdminUsersPage({ navigation }) {
   const [saving, setSaving] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
 
+  // Create user state
+  const [createModalVisible, setCreateModalVisible] = React.useState(false);
+  const [newName, setNewName] = React.useState('');
+  const [newEmail, setNewEmail] = React.useState('');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [newPhone, setNewPhone] = React.useState('');
+  const [newUserRole, setNewUserRole] = React.useState('user');
+  const [creating, setCreating] = React.useState(false);
+
   const ensureAdmin = React.useCallback(async () => {
     const {
       data: { user },
@@ -195,10 +204,12 @@ export default function AdminUsersPage({ navigation }) {
 
     setDeleting(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { error } = await supabase.functions.invoke('admin-delete-user', {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
         body: {
           userId: selectedUser.id,
-          shouldSoftDelete: true,
+          shouldSoftDelete: false,
         },
       });
 
@@ -213,6 +224,66 @@ export default function AdminUsersPage({ navigation }) {
       Alert.alert('Delete Error', err?.message || 'Unable to delete this user.');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const openCreateModal = () => {
+    setNewName('');
+    setNewEmail('');
+    setNewPassword('');
+    setNewPhone('');
+    setNewUserRole('user');
+    setCreateModalVisible(true);
+  };
+
+  const closeCreateModal = () => {
+    if (creating) return;
+    setCreateModalVisible(false);
+  };
+
+  const createUser = async () => {
+    if (creating) return;
+    const trimmedEmail = newEmail.trim();
+    const trimmedName = newName.trim();
+    const trimmedPassword = newPassword.trim();
+
+    if (!trimmedName) {
+      Alert.alert('Invalid Input', 'Please enter a full name.');
+      return;
+    }
+    if (!trimmedEmail) {
+      Alert.alert('Invalid Input', 'Please enter an email address.');
+      return;
+    }
+    if (!trimmedPassword || trimmedPassword.length < 6) {
+      Alert.alert('Invalid Input', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+        body: {
+          email: trimmedEmail,
+          password: trimmedPassword,
+          fullName: trimmedName,
+          phone: newPhone.trim() || null,
+          role: newUserRole,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.success === false) throw new Error(data.error || 'Unable to create user.');
+
+      await loadUsers();
+      closeCreateModal();
+      Alert.alert('Created', `Account for ${trimmedName} was created successfully.`);
+    } catch (err) {
+      Alert.alert('Create Error', err?.message || 'Unable to create user.');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -237,7 +308,16 @@ export default function AdminUsersPage({ navigation }) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.adminTitle}>Users</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <Text style={styles.adminTitle}>Users</Text>
+          <TouchableOpacity
+            style={{ backgroundColor: '#2C3E50', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' }}
+            onPress={openCreateModal}
+          >
+            <Ionicons name="person-add-outline" size={15} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Add User</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.adminSubtitle}>Manage user roles and account details.</Text>
 
         <TextInput
@@ -274,6 +354,80 @@ export default function AdminUsersPage({ navigation }) {
           );
         })}
       </ScrollView>
+
+      {/* Create User Modal */}
+      <Modal visible={createModalVisible} transparent={true} animationType="fade" onRequestClose={closeCreateModal}>
+        <View style={styles.profileModalOverlay}>
+          <View style={styles.profileModalCard}>
+            <Text style={styles.profileModalTitle}>Create User</Text>
+
+            <Text style={styles.profileModalLabel}>Full Name *</Text>
+            <TextInput
+              style={styles.profileModalInput}
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Enter full name"
+              placeholderTextColor="#9AA7B4"
+            />
+
+            <Text style={styles.profileModalLabel}>Email *</Text>
+            <TextInput
+              style={styles.profileModalInput}
+              value={newEmail}
+              onChangeText={setNewEmail}
+              placeholder="Enter email address"
+              placeholderTextColor="#9AA7B4"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.profileModalLabel}>Password * (min 6 chars)</Text>
+            <TextInput
+              style={styles.profileModalInput}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholder="Enter password"
+              placeholderTextColor="#9AA7B4"
+              secureTextEntry
+            />
+
+            <Text style={styles.profileModalLabel}>Phone</Text>
+            <TextInput
+              style={styles.profileModalInput}
+              value={newPhone}
+              onChangeText={setNewPhone}
+              placeholder="Enter phone number (optional)"
+              placeholderTextColor="#9AA7B4"
+              keyboardType="phone-pad"
+            />
+
+            <Text style={styles.profileModalLabel}>Role</Text>
+            <View style={styles.adminInlineActions}>
+              <TouchableOpacity
+                style={newUserRole === 'user' ? styles.adminSmallButton : styles.adminSmallOutlineButton}
+                onPress={() => setNewUserRole('user')}
+              >
+                <Text style={newUserRole === 'user' ? styles.adminSmallButtonText : styles.adminSmallOutlineButtonText}>User</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={newUserRole === 'admin' ? styles.adminSmallButton : styles.adminSmallOutlineButton}
+                onPress={() => setNewUserRole('admin')}
+              >
+                <Text style={newUserRole === 'admin' ? styles.adminSmallButtonText : styles.adminSmallOutlineButtonText}>Admin</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.profileModalActions, { justifyContent: 'flex-end', marginTop: 20 }]}>
+              <TouchableOpacity style={[styles.profileModalCancelBtn, { marginRight: 10 }]} onPress={closeCreateModal} disabled={creating}>
+                <Text style={styles.profileModalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.profileModalSaveBtn} onPress={createUser} disabled={creating}>
+                <Text style={styles.profileModalSaveText}>{creating ? 'Creating...' : 'Create'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={modalVisible} transparent={true} animationType="fade" onRequestClose={closeUserModal}>
         <View style={styles.profileModalOverlay}>
