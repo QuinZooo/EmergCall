@@ -19,8 +19,6 @@ import GPSPage from './src/pages/GPSPage.jsx';
 import MedicalInfoPage from './src/pages/MedicalInfoPage.jsx';
 import MyReportsPage from './src/pages/MyReportsPage.jsx';
 import ReportDetailPage from './src/pages/ReportDetailPage.jsx';
-import MfaSetupPage from './src/pages/MfaSetupPage.jsx';
-import MfaVerifyPage from './src/pages/MfaVerifyPage.jsx';
 import SettingsPage from './src/pages/SettingsPage.jsx';
 import AdminDashboardPage from './src/pages/AdminDashboardPage.jsx';
 import AdminReportsPage from './src/pages/AdminReportsPage.jsx';
@@ -32,7 +30,7 @@ const Stack = createNativeStackNavigator();
 const SHAKE_THRESHOLD = 2.1;
 const SHAKE_WINDOW_MS = 700;
 const SHAKE_COOLDOWN_MS = 5000;
-const SHAKE_DISABLED_ROUTES = new Set(['Splash', 'Login', 'Signup', 'ForgotPassword', 'SOS', 'MfaSetup', 'MfaVerify']);
+const SHAKE_DISABLED_ROUTES = new Set(['Splash', 'Login', 'Signup', 'ForgotPassword', 'SOS']);
 
 const routes = [
   { name: 'Splash', component: SplashPage },
@@ -47,8 +45,6 @@ const routes = [
   { name: 'ReportIncident', component: ReportIncidentPage },
   { name: 'MyReports', component: MyReportsPage },
   { name: 'ReportDetail', component: ReportDetailPage },
-  { name: 'MfaSetup', component: MfaSetupPage },
-  { name: 'MfaVerify', component: MfaVerifyPage },
   { name: 'Settings', component: SettingsPage },
   { name: 'GPS', component: GPSPage },
   { name: 'MedicalInfo', component: MedicalInfoPage },

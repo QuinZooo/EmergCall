@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, Image, TouchableOpacity, Modal, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import Header from '../components/Header.jsx';
@@ -27,6 +27,25 @@ export default function ReportDetailScreen({ navigation, route }) {
   const [report, setReport] = React.useState(null);
   const [photos, setPhotos] = React.useState([]);
   const [locationName, setLocationName] = React.useState('');
+  const [updatingStatus, setUpdatingStatus] = React.useState(false);
+  const [zoomedPhoto, setZoomedPhoto] = React.useState(null);
+
+  const updateStatus = async (nextStatus) => {
+    if (!reportId || updatingStatus) return;
+    setUpdatingStatus(true);
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: nextStatus, updated_at: new Date().toISOString() })
+        .eq('id', reportId);
+      if (error) throw error;
+      setReport((prev) => ({ ...prev, status: nextStatus, updated_at: new Date().toISOString() }));
+    } catch (err) {
+      Alert.alert('Update Error', err?.message || 'Unable to update report status.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const loadDetail = React.useCallback(async () => {
     if (!reportId) {
@@ -149,13 +168,18 @@ export default function ReportDetailScreen({ navigation, route }) {
                 <View style={styles.myReportPhotoGrid}>
                   {photos.map((photo, index) => (
                     photo.file_url ? (
-                      <Image
+                      <TouchableOpacity
                         key={`${photo.file_path || report.id}-${index}`}
-                        source={{ uri: photo.file_url }}
-                        style={styles.myReportPhoto}
-                        resizeMode="cover"
-                        onError={(e) => console.warn('Photo load failed:', e.nativeEvent.error)}
-                      />
+                        onPress={() => setZoomedPhoto(photo.file_url)}
+                        activeOpacity={0.85}
+                      >
+                        <Image
+                          source={{ uri: photo.file_url }}
+                          style={styles.myReportPhoto}
+                          resizeMode="cover"
+                          onError={(e) => console.warn('Photo load failed:', e.nativeEvent.error)}
+                        />
+                      </TouchableOpacity>
                     ) : null
                   ))}
                 </View>
@@ -163,11 +187,64 @@ export default function ReportDetailScreen({ navigation, route }) {
                 <Text style={styles.reportDetailValue}>No photos attached</Text>
               )}
             </View>
+
+            {adminView ? (
+              <View style={{ marginTop: 20, gap: 10 }}>
+                <Text style={styles.reportDetailLabel}>Update Status</Text>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <TouchableOpacity
+                    style={[
+                      styles.primaryButton,
+                      { flex: 1, backgroundColor: report.status === 'in_progress' ? '#aaa' : '#E67E22', paddingVertical: 10 },
+                    ]}
+                    onPress={() => updateStatus('in_progress')}
+                    disabled={updatingStatus || report.status === 'in_progress'}
+                  >
+                    <Text style={[styles.primaryButtonText, { fontSize: 13 }]}>
+                      {updatingStatus && report.status !== 'in_progress' ? 'Updating...' : 'In Progress'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.primaryButton,
+                      { flex: 1, backgroundColor: report.status === 'resolved' ? '#aaa' : '#27AE60', paddingVertical: 10 },
+                    ]}
+                    onPress={() => updateStatus('resolved')}
+                    disabled={updatingStatus || report.status === 'resolved'}
+                  >
+                    <Text style={[styles.primaryButtonText, { fontSize: 13 }]}>
+                      {updatingStatus && report.status !== 'resolved' ? 'Updating...' : 'Resolved'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
 
       <BottomNavBar navigation={navigation} variant={adminView ? 'admin' : 'user'} />
+
+      {/* Fullscreen photo viewer */}
+      <Modal visible={!!zoomedPhoto} transparent animationType="fade" onRequestClose={() => setZoomedPhoto(null)}>
+        <StatusBar hidden />
+        <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 48, right: 20, zIndex: 10, padding: 8, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20 }}
+            onPress={() => setZoomedPhoto(null)}
+          >
+            <Ionicons name="close" size={26} color="#fff" />
+          </TouchableOpacity>
+          {zoomedPhoto ? (
+            <Image
+              source={{ uri: zoomedPhoto }}
+              style={{ width: '100%', height: '85%' }}
+              resizeMode="contain"
+            />
+          ) : null}
+        </View>
+      </Modal>
     </View>
   );
 }
